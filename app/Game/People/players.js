@@ -80,7 +80,7 @@ Player.prototype.swing = function (self, pitch) {
             if(part.seen){
                 swing[part.part] = part.type;
             }else{
-                swing[part.part] = 'mid';
+                swing[part.part] = 'middle';
                 if(part.part == 'curve'){
                     swing[part.part] = false;
                 }
@@ -94,6 +94,9 @@ Player.prototype.swing = function (self, pitch) {
     }
     //the pitch.count needs to be an array of strings with [balls, strikes, current pitch strike?]
     swing.type = self.useBatBrain(self, pitch.count.reduce(function(agg, curr){ return agg + curr }));
+    swing.power = self.attributes.power;
+    swing.contact = self.attributes.contact;
+    swing.seen = parts.filter(function(part){ return part.seen; }).length;
     return swing;
 };
 
@@ -209,14 +212,14 @@ Player.prototype.pitch = function (self, indicators) {
                 }
             },
             strike: {
-                yes: {
+                strike: {
                     attempts: 1,
                     hits: 1,
                     bases: 1,
                     BA: 0,
                     SLG: 0,
                 },
-                no: {
+                ball: {
                     attempts: 1,
                     hits: 1,
                     bases: 1,
@@ -259,5 +262,7 @@ Player.prototype.pitch = function (self, indicators) {
     }
 
     self.pitchCount = self.pitchCount + 1;
+    pitch.speed = self.attributes.speed;
+    pitch.curveStat = self.attributes.curve;
     return pitch;
 };
