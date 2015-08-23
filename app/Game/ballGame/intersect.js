@@ -3,7 +3,7 @@
  * This is the intersection of the swing and pitch, determining the results.
  * @param  {object} pitch The pitch object that is created by the pitcher
  * @param  {object} swing The swing object that is created by the batter, in response to the pitch.
- * @return {string}       a single word response on the result of the intersection; 'strike', 'ball', 'single', 'out', etc. This is without fielding. 
+ * @return {string}       a single word response on the result of the intersection; 'strike', 'ball', 'single', etc. This is without fielding. 
  */
 var intersect = function(pitch, swing){
     if(!swing.type === 'noSwing'){

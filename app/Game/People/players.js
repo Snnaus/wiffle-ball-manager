@@ -249,7 +249,7 @@ Player.prototype.pitch = function (self, indicators) {
 
     //changing whether the pitch is a strike or a ball based on a stamina check
     if(randNum(100) < self.pitchCount - (self.attributes.pitchStamina + self.attributes.pitchControl)*4){
-        if(pitch.strike === 'yes'){
+        if(pitch.strike === 'yes' && pitch.vert != 'middle' || pitch.hori != 'middle'){
             pitch.strike = 'no';
         } else{
             pitch.strike = 'yes';
