@@ -32,6 +32,7 @@ function Player(params){
         speed: randNum(),
         curve: randNum(),
         awareness: randNum(),
+        agility: randNum(),
         catching: randNum(),
         throwing: randNum(),
         pitchStamina: randNum(),
