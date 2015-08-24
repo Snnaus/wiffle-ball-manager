@@ -21,7 +21,7 @@ var randNum = function(max, min){
  */
 function Player(params){
     //general information about the player
-    this.ID = params.ID;
+    this.id = params.id;
     this.name = params.name;
 
     //the attributes
@@ -94,7 +94,7 @@ Player.prototype.swing = function (self, pitch) {
         pitch.count.current = pitch.count.current.type;
     }
     //the pitch.count needs to be an array of strings with [balls, strikes, current pitch strike?]
-    swing.type = self.useBatBrain(self, pitch.count.reduce(function(agg, curr){ return agg + curr }));
+    swing.type = self.useBatBrain(self, Object.keys(pitch.count).reduce(function(agg, curr){ return agg + pitch.count[curr]; }));
     swing.power = self.attributes.power;
     swing.contact = self.attributes.contact;
     swing.seen = parts.filter(function(part){ return part.seen; }).length;
@@ -157,7 +157,7 @@ Player.prototype.pitch = function (self, indicators) {
     if(concept){
         Object.keys(concept).forEach(function(part){
             pitch[part] = Object.keys(concept[part]).reduce(function(old, curr){
-                if(concept[old] && conept[old].SLG > concept[curr].SLG){
+                if(concept[part][old] && concept[part][old].SLG > concept[part][curr].SLG){
                     return curr;
                 }else{
                     return old
@@ -258,8 +258,8 @@ Player.prototype.pitch = function (self, indicators) {
     }
 
     pitch.count = {
-        ball: indicators.balls,
-        strike: indicators.strikes
+        ball: indicators.ball,
+        strike: indicators.strike
     }
 
     self.pitchCount = self.pitchCount + 1;
