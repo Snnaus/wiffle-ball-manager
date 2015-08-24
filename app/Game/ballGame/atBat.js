@@ -6,7 +6,7 @@
  * @param  {object} count    An object that holds the the current balls and strikes. The intial call of this function the should be undefined.
  * @return {string}          The result of the at bat: the hit result, or out, strikeout, or walk.
  */
-var atBat = function(pitcher, batter, fielders, count){
+function atBat(pitcher, batter, fielders, count){
     if(!count){
         count = {
             ball: 0,
@@ -32,10 +32,10 @@ var atBat = function(pitcher, batter, fielders, count){
         //this is if the pitch was not hit, or a foul ball.
         if(result == 'foul'){
             if(count['strike'] < 2){
-                count['strike'] += 1;
+                count['strike'] ++ 1;
             }
         }else{
-            count[result] += 1;
+            count[result] ++ 1;
         }
 
         if(count.ball > 3){
@@ -65,23 +65,23 @@ function intersect(pitch, swing){
         }
         Object.keys(swing).filter(function(key){ return ['vert', 'hori'].indexOf(key) !== -1 }).forEach(function(key){
             if(pitch[key] === swing[key]){
-                hittersChance += 5;
+                hittersChance ++ 5;
             }else if(swing[key] === 'middle'){
-                hittersChance += 2;
+                hittersChance ++ 2;
             }else{
                 hittersChance -= 5;
             }
         })
         if(pitch.curve === 'true' && swing.wait === 'true'){
-            hittersChance += 5;
+            hittersChance ++ 5;
         }
 
         //determining the chance that the pitch will 'miss' the batter.
         var pitchersChance = pitch.speed;
         if(pitch.curve === 'true'){
-            pitchersChance += pitch.curve * 2;
+            pitchersChance ++ pitch.curve * 2;
         } else{
-            pitchersChance += pitch.speed;
+            pitchersChance ++ pitch.speed;
         }
 
         //determine wheter the batter hits the pitch, and the outcome of that.
@@ -168,6 +168,37 @@ function fielding(hit, contact, fielders){
             return hit;
         }else {
             return 'out';
+        }
+    }
+}
+
+/**
+ * This function updates the stats for the players that revolve around the at bat
+ * @param  {object} pitcherStats The pitching stat object for the pitchers gamestat object
+ * @param  {object} batterStats  The batting stat object for the batters gamestat object
+ * @param  {string} result       the string result of the at bat.
+ */
+function updateStats(pitcherStats, batterStats, result){
+    if(['out', 'strikeout'].indexOf(result) != -1){
+        batterStats.AB ++ 1;
+        if(result == 'strikeout'){
+            batterStats.SO ++ 1;
+            pitcherStats.SO ++ 1;
+        }
+    }else if(result == 'walk'){
+        batterStats.BB ++ 1;
+        pitcherStats.BB ++ 1;
+    }else{
+        batterStats.AB ++ 1;
+        batterStats.H ++ 1;
+        pitcherStats.H ++ 1;
+        if(result == 'homerun'){
+            batterStats.HR ++ 1;
+            pitcherStats.HR ++ 1;
+        }else if(result == 'triple'){
+            batterStats.3B ++ 1;
+        }else if(result == 'double'){
+            batterStats.2B ++ 1;
         }
     }
 }

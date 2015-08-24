@@ -50,6 +50,31 @@ function Player(params){
 
     //Stats
     //pastSeasons and playoffs is formatted like JSON, where each season is a key to the stats object
+    this.gameStats = {
+        batting: {
+            G: 0,
+            PA: 0,
+            AB: 0,
+            R: 0,
+            H: 0,
+            2B: 0,
+            3B: 0,
+            HR: 0,
+            RBI: 0,
+            SO: 0,
+            BB: 0
+        },
+        pitching: {
+            G: 0,
+            GS: 0,
+            IP: 0,
+            H: 0,
+            R: 0,
+            HR: 0,
+            BB: 0,
+            SO: 0
+        }
+    }
     this.currentSeason = {};
     this.pastSeasons = {};
     this.playoffs = {};
