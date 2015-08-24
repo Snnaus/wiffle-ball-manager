@@ -258,8 +258,8 @@ Player.prototype.pitch = function (self, indicators) {
     }
 
     pitch.count = {
-        balls: indicators.balls,
-        strikes: indicators.strikes
+        ball: indicators.balls,
+        strike: indicators.strikes
     }
 
     self.pitchCount = self.pitchCount + 1;

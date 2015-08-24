@@ -37,6 +37,7 @@ var intersect = function(pitch, swing){
         var swing.hitCheck = randNum(hittersChance), pitch.pitchCheck = randNum(pitchersChance);
         if( swing.hitCheck > pitch.pitchCheck){
             var baseCha = baseChances(pitch, swing), fate = randNum(100);
+            swing.hittersChance = hittersChance;
             return baseCha.reduce(function(old, curr){
                 if(!old && curr.chance <= fate){
                     return curr
@@ -90,7 +91,7 @@ var baseChances = function(pitch, swing){
  * This is the function that represents the fielding of the defense.
  * @param  {string} hit      A string representing what kind of hit was made. Cannot be 'homerun';
  * @param  {number} contact  A number representing the batters contact with the ball; is hittersChance from intersect.
- * @param  {object} fielders An object that has the defensive players stored inder 'first'(base) and 'outfield'
+ * @param  {object} fielders An object that has the defensive players stored under 'first'(base) and 'outfield'
  * @return {string}          returns the hit string if there is no out, otherwise returns 'out'.
  */
 var fielding = function(hit, contact, fielders){
