@@ -23,8 +23,8 @@ function atBat(pitcher, batter, fielders, count){
     var pitch = pitcher.pitch(pitcher, indicators);
     var swing = batter.swing(batter, pitch);
     var result = intersect(pitch, swing);
-    if(['strike', 'ball', 'homerun'].indexOf(result) != -1){
-        result = fielding(result, swing.hittersChance, fielders);
+    if(['strike', 'ball', 'homerun'].indexOf(result) == -1){
+        result = fielding(result, swing.hittersCheck, fielders);
     }
 
     //these are the logic gates for the various possible outcomes of the intersect function
@@ -32,10 +32,10 @@ function atBat(pitcher, batter, fielders, count){
         //this is if the pitch was not hit, or a foul ball.
         if(result == 'foul'){
             if(count['strike'] < 2){
-                count['strike'] ++ 1;
+                count['strike'] = count['strike'] + 1;
             }
         }else{
-            count[result] ++ 1;
+            count[result] = count[result] + 1;
         }
 
         if(count.ball > 3){
@@ -57,31 +57,32 @@ function atBat(pitcher, batter, fielders, count){
  * @return {string}       a single word response on the result of the intersection; 'strike', 'ball', 'single', etc. This is without fielding.
  */
 function intersect(pitch, swing){
-    if(!swing.type === 'noSwing'){
+    if(swing.type !== 'noSwing'){
         //determining the chance the batter has to hit the ball.
         var hittersChance = swing.contact + swing.seen * 5;
-        if(swing.type === 'power'){
-            hittersChance = hittersChance - 10;
+        if(swing.type === 'contact'){
+            hittersChance = hittersChance + 5;
         }
         Object.keys(swing).filter(function(key){ return ['vert', 'hori'].indexOf(key) !== -1 }).forEach(function(key){
             if(pitch[key] === swing[key]){
-                hittersChance ++ 5;
+                hittersChance = hittersChance + 5;
             }else if(swing[key] === 'middle'){
-                hittersChance ++ 2;
+                hittersChance = hittersChance + 2;
             }else{
-                hittersChance -= 5;
+                conole.log(pitch[key], swing[key]);
+                hittersChance = hittersChance - 5;
             }
-        })
+        });
         if(pitch.curve === 'true' && swing.wait === 'true'){
-            hittersChance ++ 5;
+            hittersChance = hittersChance + 5;
         }
 
         //determining the chance that the pitch will 'miss' the batter.
         var pitchersChance = pitch.speed;
         if(pitch.curve === 'true'){
-            pitchersChance ++ pitch.curve * 2;
+            pitchersChance = pitchersChance + pitch.curve * 2;
         } else{
-            pitchersChance ++ pitch.speed;
+            pitchersChance = pitchersChance + pitch.speed;
         }
 
         //determine wheter the batter hits the pitch, and the outcome of that.
@@ -89,6 +90,7 @@ function intersect(pitch, swing){
         pitch.pitchCheck = randNum(pitchersChance);
         if( swing.hitCheck > pitch.pitchCheck){
             var baseCha = baseChances(pitch, swing), fate = randNum(100);
+            console.log(baseCha);
             swing.hittersChance = hittersChance;
             return baseCha.reduce(function(old, curr){
                 if(!old && curr.chance <= fate){
@@ -116,17 +118,17 @@ function intersect(pitch, swing){
 function baseChances(pitch, swing){
     var heightMod = 0;
     if(pitch.vert == 'high'){
-        heightMod = 20;
+        heightMod = 10;
     } else if(pitch.vert == 'low'){
-        heightMod = -20;
+        heightMod = -10;
     }
 
     var foul = 0, single = 0, double = 0, triple = 0, homerun = 0, coef = 1;
     if(swing.type == 'power'){
         coef = 2;
     }
-    single = (swing.hitCheck - heightMod)/coef;
-    foul = ((60 - heightMod)/coef) - single;
+    single = 60 - (swing.hitCheck - heightMod)/coef;
+    foul = ((70 - heightMod)/coef) - single;
     homerun = swing.power/(2*coef),
     triple = swing.power/(4*coef);
     double = 100 - (foul+single+triple+homerun);
@@ -179,26 +181,51 @@ function fielding(hit, contact, fielders){
  * @param  {string} result       the string result of the at bat.
  */
 function updateStats(pitcherStats, batterStats, result){
+    //var pitcherStats = pitcher.gameStats.pitching, batterStats = batter.gameStats.batting;
     if(['out', 'strikeout'].indexOf(result) != -1){
-        batterStats.AB ++ 1;
+        batterStats.AB = batterStats.AB + 1;
         if(result == 'strikeout'){
-            batterStats.SO ++ 1;
-            pitcherStats.SO ++ 1;
+            batterStats.SO = batterStats.SO + 1;
+            pitcherStats.SO = pitcherStats.SO + 1;
         }
     }else if(result == 'walk'){
-        batterStats.BB ++ 1;
-        pitcherStats.BB ++ 1;
+        batterStats.BB = batterStats.BB + 1;
+        pitcherStats.BB = pitcherStats.BB + 1;
     }else{
-        batterStats.AB ++ 1;
-        batterStats.H ++ 1;
-        pitcherStats.H ++ 1;
+        batterStats.AB = batterStats.AB + 1;
+        batterStats.H = batterStats.H + 1;
+        pitcherStats.H = pitcherStats.H + 1;
         if(result == 'homerun'){
-            batterStats.HR ++ 1;
-            pitcherStats.HR ++ 1;
+            batterStats.HR = batterStats.HR + 1;
+            pitcherStats.HR = pitcherStats.HR + 1;
         }else if(result == 'triple'){
-            batterStats.3B ++ 1;
+            batterStats['3B'] = batterStats['3B'] + 1;
         }else if(result == 'double'){
-            batterStats.2B ++ 1;
+            batterStats['2B'] = batterStats['2B'] + 1;
         }
     }
 }
+
+
+
+var testFielders = {
+    first: new Player({id: 1, name:'first'}),
+    outfield: [new Player({id: 2, name:'left'}),
+                new Player({id:3, name:'right'})]
+}, pitcher = new Player({id:4, name:'pitch'}),
+batter = new Player({id:5, name:'batter'});
+
+var count = 0
+for(var i = 0;i<500;i++){
+    var result = atBat(pitcher, batter, testFielders);
+    updateStats(pitcher.gameStats.pitching, batter.gameStats.batting, result);
+
+    //console.log(result);
+    count ++;
+    if(count > 100){
+        pitcher.pitchCount = 0;
+        count = 0;
+    }
+}
+
+console.log(pitcher.gameStats.pitching, batter.gameStats.batting);

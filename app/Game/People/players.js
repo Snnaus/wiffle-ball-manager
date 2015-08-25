@@ -57,8 +57,8 @@ function Player(params){
             AB: 0,
             R: 0,
             H: 0,
-            2B: 0,
-            3B: 0,
+            '2B': 0,
+            '3B': 0,
             HR: 0,
             RBI: 0,
             SO: 0,
@@ -251,7 +251,7 @@ Player.prototype.pitch = function (self, indicators) {
                     bases: 1,
                     BA: 0,
                     SLG: 0,
-                },
+                }
             },
             curve: {
                 yes: {
@@ -267,7 +267,7 @@ Player.prototype.pitch = function (self, indicators) {
                     bases: 1,
                     BA: 0,
                     SLG: 0,
-                },
+                }
             }
         }
         return self.pitch(self, indicators);
@@ -276,9 +276,9 @@ Player.prototype.pitch = function (self, indicators) {
     //changing whether the pitch is a strike or a ball based on a stamina check
     if(randNum(100) < self.pitchCount - (self.attributes.pitchStamina + self.attributes.pitchControl)*4){
         if(pitch.strike === 'yes' && pitch.vert != 'middle' || pitch.hori != 'middle'){
-            pitch.strike = 'no';
+            pitch.strike = 'ball';
         } else{
-            pitch.strike = 'yes';
+            pitch.strike = 'strike';
         }
     }
 
@@ -303,7 +303,7 @@ Player.prototype.updateSeasonStats = function (self) {
     Object.keys(self.gameStats).forEach(function(key){
         if(self.currentSeason[key]){
             Object.keys(self.gameStats[key]).forEach(function(newKey){
-                self.currentSeason[key][newKey] ++ self.gameStats[key][newKey];
+                self.currentSeason[key][newKey] = self.currentSeason[key][newKey] + self.gameStats[key][newKey];
             });
         }else{
             var stats = Object.keys(self.gameStats[key]).reduce(function(old, curr){
@@ -322,8 +322,8 @@ Player.prototype.updateSeasonStats = function (self) {
             AB: 0,
             R: 0,
             H: 0,
-            2B: 0,
-            3B: 0,
+            '2B': 0,
+            '3B': 0,
             HR: 0,
             RBI: 0,
             SO: 0,
