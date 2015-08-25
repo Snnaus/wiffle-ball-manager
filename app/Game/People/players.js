@@ -292,3 +292,52 @@ Player.prototype.pitch = function (self, indicators) {
     pitch.curveStat = self.attributes.curve;
     return pitch;
 };
+
+/**
+ * This method updates the players currentSeason stats after each game.
+ * @param  {object} self The player object.
+ * @return {none}      Adjusts the object attributes inside the player.
+ */
+Player.prototype.updateSeasonStats = function (self) {
+    //moving the gameStats to the currentSeason stats.
+    Object.keys(self.gameStats).forEach(function(key){
+        if(self.currentSeason[key]){
+            Object.keys(self.gameStats[key]).forEach(function(newKey){
+                self.currentSeason[key][newKey] ++ self.gameStats[key][newKey];
+            });
+        }else{
+            var stats = Object.keys(self.gameStats[key]).reduce(function(old, curr){
+                old[curr] = self.gameStats[key][curr];
+                return old;
+            }, {});
+            self.currentSeason[key] = stats;
+        }
+    });
+
+    //reseting the gameStats
+    self.gameStats = {
+        batting: {
+            G: 0,
+            PA: 0,
+            AB: 0,
+            R: 0,
+            H: 0,
+            2B: 0,
+            3B: 0,
+            HR: 0,
+            RBI: 0,
+            SO: 0,
+            BB: 0
+        },
+        pitching: {
+            G: 0,
+            GS: 0,
+            IP: 0,
+            H: 0,
+            R: 0,
+            HR: 0,
+            BB: 0,
+            SO: 0
+        }
+    }
+};
