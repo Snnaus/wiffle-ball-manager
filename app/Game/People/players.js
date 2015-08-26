@@ -12,7 +12,7 @@ var randNum = function(max, min){
     if(!max){
         max = 10;
     }
-    return Math.floor(Math.random()*max)+min;
+    return Math.floor(Math.random()*(max-min))+min;
 };
 
 /**
@@ -26,18 +26,18 @@ function Player(params){
 
     //the attributes
     this.attributes = {
-        contact: randNum(),
-        power: randNum(),
-        eye: randNum(),
-        speed: randNum(),
-        curve: randNum(),
-        awareness: randNum(),
-        agility: randNum(),
-        catching: randNum(),
-        throwing: randNum(),
-        pitchStamina: randNum(),
-        pitchControl: randNum(),
-        fieldingStamina: randNum()
+        contact: randNum(params.maxPot, params.minPot),
+        power: randNum(params.maxPot, params.minPot),
+        eye: randNum(params.maxPot, params.minPot),
+        speed: randNum(params.maxPot, params.minPot),
+        curve: randNum(params.maxPot, params.minPot),
+        awareness: randNum(params.maxPot, params.minPot),
+        agility: randNum(params.maxPot, params.minPot),
+        catching: randNum(params.maxPot, params.minPot),
+        throwing: randNum(params.maxPot, params.minPot),
+        pitchStamina: randNum(params.maxPot, params.minPot),
+        pitchControl: randNum(params.maxPot, params.minPot),
+        fieldingStamina: randNum(params.maxPot, params.minPot)
     };
 
 
@@ -47,6 +47,7 @@ function Player(params){
         contact: false
     }
     this.pitchCount = 0;
+    this.ledger = [];
 
     //Stats
     //pastSeasons and playoffs is formatted like JSON, where each season is a key to the stats object
@@ -119,7 +120,9 @@ Player.prototype.swing = function (self, pitch) {
         pitch.count.current = pitch.count.current.type;
     }
     //the pitch.count needs to be an array of strings with [balls, strikes, current pitch strike?]
-    swing.type = self.useBatBrain(self, Object.keys(pitch.count).reduce(function(agg, curr){ return agg + pitch.count[curr]; }));
+    var percept =  Object.keys(pitch.count).reduce(function(agg, curr){ return agg + pitch.count[curr]; });
+    swing.type = self.useBatBrain(self, percept);
+    self.ledger.push({percept: percept, action: swing.type, type: 'batting'});
     swing.power = self.attributes.power;
     swing.contact = self.attributes.contact;
     swing.seen = parts.filter(function(part){ return part.seen; }).length;
@@ -148,25 +151,25 @@ Player.prototype.useBatBrain = function (self, key) {
                 attempts: 1,
                 hits: 1,
                 bases: 1,
-                BA: 0,
-                SLG: 0,
+                BA: 1,
+                SLG: 1,
             },
             contact: {
                 attempts: 1,
                 hits: 1,
                 bases: 1,
-                BA: 0,
-                SLG: 0,
+                BA: 1,
+                SLG: 1,
             },
             noSwing: {
                 attempts: 1,
                 hits: 1,
                 bases: 1,
-                BA: 0,
-                SLG: 0,
+                BA: 1,
+                SLG: 1,
             }
         };
-        return 'contact';
+        return self.useBatBrain(self, key);
     }
 };
 
@@ -177,12 +180,12 @@ Player.prototype.useBatBrain = function (self, key) {
  * @return {object}            Object with all the details of the pitch; to be used by the batter for swing
  */
 Player.prototype.pitch = function (self, indicators) {
-    var key = Object.keys(indicators).reduce(function(agg, curr){ return agg + indicators[curr]; }), pitch = {};
+    var key = Object.keys(indicators).reduce(function(agg, curr){ return agg + indicators[curr]; }, ''), pitch = {};
     var concept = self.pitchBrain[key];
     if(concept){
         Object.keys(concept).forEach(function(part){
             pitch[part] = Object.keys(concept[part]).reduce(function(old, curr){
-                if(concept[part][old] && concept[part][old].SLG > concept[part][curr].SLG){
+                if(concept[part][old].SLG >= concept[part][curr].SLG){
                     return curr;
                 }else{
                     return old
@@ -193,78 +196,78 @@ Player.prototype.pitch = function (self, indicators) {
         self.pitchBrain[key] = {
             vert: {
                 high: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 },
                 low: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 },
                 middle: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 }
             },
             hori: {
                 inside: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 },
                 outside: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 },
                 middle: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 }
             },
             strike: {
                 strike: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 },
                 ball: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 }
             },
             curve: {
                 yes: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 },
                 no: {
-                    attempts: 1,
-                    hits: 1,
-                    bases: 1,
+                    attempts: 0,
+                    hits: 0,
+                    bases: 0,
                     BA: 0,
                     SLG: 0,
                 }
@@ -275,21 +278,22 @@ Player.prototype.pitch = function (self, indicators) {
 
     //changing whether the pitch is a strike or a ball based on a stamina check
     if(randNum(100) < self.pitchCount - (self.attributes.pitchStamina + self.attributes.pitchControl)*4){
-        if(pitch.strike === 'yes' && pitch.vert != 'middle' || pitch.hori != 'middle'){
+        pitch.strike = 'ball';
+        /*if(pitch.strike === 'yes' && pitch.vert != 'middle' || pitch.hori != 'middle'){
             pitch.strike = 'ball';
         } else{
             pitch.strike = 'strike';
-        }
+        }*/
     }
 
     pitch.count = {
         ball: indicators.ball,
         strike: indicators.strike
     }
-
     self.pitchCount = self.pitchCount + 1;
     pitch.speed = self.attributes.speed;
     pitch.curveStat = self.attributes.curve;
+    self.ledger.push({percept: key, action: pitch, type: 'pitch'});
     return pitch;
 };
 
@@ -339,5 +343,41 @@ Player.prototype.updateSeasonStats = function (self) {
             BB: 0,
             SO: 0
         }
+    }
+};
+
+/**
+ * This updates the 'brains' of the player after the atBat
+ * @param  {object} self   The player object, whos 'brain' is being updated.
+ * @param  {string} result The result of the atBat
+ */
+Player.prototype.updateBrain = function (self, result) {
+    if(result == 'homerun'){
+        result = 4;
+    }else if(result == 'triple'){
+        result = 3;
+    }else if(result == 'double'){
+        result = 2;
+    }else if(result == 'single' || result == 'walk'){
+        result = 1;
+    }else{
+        result = 0;
+    }
+
+    if(self.ledger[0].type == 'pitch'){
+        self.ledger.forEach(function(event){
+            var pitch = event.action;
+            Object.keys(pitch).filter(function(key){ return ['curveStat', 'count', 'speed', 'pitchCheck'].indexOf(key) === -1; }).forEach(function(key){
+                self.pitchBrain[event.percept][key][pitch[key]].attempts = parseInt(self.pitchBrain[event.percept][key][pitch[key]].attempts) + 1;
+                self.pitchBrain[event.percept][key][pitch[key]].bases = parseInt(self.pitchBrain[event.percept][key][pitch[key]].bases) + parseInt(result);
+                self.pitchBrain[event.percept][key][pitch[key]].SLG = parseFloat(parseInt(self.pitchBrain[event.percept][key][pitch[key]].bases) / parseInt(self.pitchBrain[event.percept][key][pitch[key]].attempts));
+            });
+        });
+    }else{
+        self.ledger.forEach(function(event){
+            self.batBrain[event.percept][event.action].attempts = parseInt(self.batBrain[event.percept][event.action].attempts) + 1;
+            self.batBrain[event.percept][event.action].bases = parseInt(self.batBrain[event.percept][event.action].bases) + parseInt(result);
+            self.batBrain[event.percept][event.action].SLG = parseFloat(self.batBrain[event.percept][event.action].bases / self.batBrain[event.percept][event.action].attempts);
+        });
     }
 };
