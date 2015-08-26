@@ -216,30 +216,3 @@ function updateStats(pitcherStats, batterStats, result){
         }
     }
 }
-
-
-
-
-var testFielders = {
-    first: new Player({id: 1, name:'first', maxPot: 10, minPot: 10}),
-    outfield: [new Player({id: 2, name:'left', maxPot: 10, minPot: 10}),
-                new Player({id:3, name:'right', maxPot: 10, minPot: 10})]
-}, pitcher = new Player({id:4, name:'pitch', maxPot: 10, minPot: 10}),
-batter = new Player({id:5, name:'batter', maxPot: 10, minPot: 10});
-
-var count = 0
-for(var i = 0;i<500;i++){
-    var result = atBat(pitcher, batter, testFielders);
-    updateStats(pitcher.gameStats.pitching, batter.gameStats.batting, result);
-    pitcher.updateBrain(pitcher, result);
-    batter.updateBrain(batter, result);
-
-    //console.log(result);
-    count ++;
-    if(count > 20){
-        pitcher.pitchCount = 0;
-        count = 0;
-    }
-}
-
-console.log(pitcher.gameStats.pitching, batter.gameStats.batting);
