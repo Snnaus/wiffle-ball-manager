@@ -27,7 +27,6 @@ function atBat(pitcher, batter, fielders, count){
     if(['strike', 'ball', 'homerun'].indexOf(result) == -1){
         result = fielding(result, swing.hittersCheck + swing.contact, fielders);
     }
-
     //these are the logic gates for the various possible outcomes of the intersect function
     if(['strike', 'ball', 'foul'].indexOf(result) != -1){
         //this is if the pitch was not hit, or a foul ball.
@@ -47,6 +46,7 @@ function atBat(pitcher, batter, fielders, count){
             return atBat(pitcher, batter, fielders, count);
         }
     } else {
+        //console.log(result);
         return result;
     }
 }
@@ -80,7 +80,7 @@ function intersect(pitch, swing){
         }
 
         if(pitch.strike == 'ball'){
-            hittersChance = hittersChance - 10;
+            hittersChance = hittersChance - 20;
         }
 
         //determining the chance that the pitch will 'miss' the batter.
@@ -98,7 +98,7 @@ function intersect(pitch, swing){
         if( swing.hitCheck > pitch.pitchCheck){
             var baseCha = baseChances(pitch, swing);
             var fate = randNum(baseCha.reduce(function(agg, curr){ return agg + curr.chance; }, 0));
-            //console.log(baseCha.map(function(chance){ return chance.chance;}), fate);
+            //console.log(baseCha.map(function(chance){ return chance.chance;}), baseCha.reduce(function(agg, curr){ return agg + curr.chance; }, 0));
             swing.hittersChance = hittersChance;
             return baseCha.reduce(function(old, curr){
                 //console.log(curr.chance + old.chance, fate, old.type, old.picked);
@@ -137,12 +137,15 @@ function baseChances(pitch, swing){
     var foul = 0, single = 0, double = 0, triple = 0, homerun = 0, coef = 1;
     if(swing.type == 'power'){
         coef = 2;
+        heightMod = heightMod + 10;
+    }else{
+        heightMod = heightMod - 10;
     }
-    single = (swing.contact + swing.hitCheck - heightMod)/coef;
-    foul = ((60 - heightMod)/coef) - single;
+    foul = (swing.contact + swing.hitCheck - heightMod)/coef;
+    single = ((70 - heightMod)) - foul;
     homerun = swing.power/(2*coef),
     triple = swing.power/(4*coef);
-    double = 40 + heightMod - (triple+homerun);
+    double = 30 + heightMod - (triple+homerun);
 
     return [{chance: foul, type: 'foul'},
         {chance: single, type: 'single'},
@@ -163,7 +166,7 @@ function fielding(hit, contact, fielders){
     if(hit === 'single'){
         if(randNum(fielders.first.attributes.agility) > 100 - contact){
             return hit;
-        } else if(randNum(fielders.first.attributes.throwing) < randNum(100)){
+        } else if(randNum(fielders.first.attributes.throwing) < randNum(100-contact)){
             return 'out';
         } else{
             return hit;
@@ -177,7 +180,7 @@ function fielding(hit, contact, fielders){
                 return old;
             }
         }, 'none');
-        if(catchAtt == 'none' || randNum(fielders.first.attributes.catching) < randNum(100)){
+        if(catchAtt == 'none' || randNum(catchAtt.attributes.catching) < randNum(100)){
             return hit;
         }else {
             return 'out';
